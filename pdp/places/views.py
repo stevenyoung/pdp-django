@@ -1,8 +1,23 @@
-from django.http import HttpResponse
+from django.shortcuts import redirect
 from django.shortcuts import render
+
+from places.models import Scene
 
 
 def home_page(request):
-  if request.method == 'POST':
-    return HttpResponse(request.POST['post_data'])
   return render(request, 'home.html')
+
+
+def new_scene(request):
+  lng = request.POST['lng']
+  lat = request.POST['lat']
+  scene = Scene.objects.create(
+    latitude=lat,
+    longitude=lng,
+    description=request.POST['description'])
+  return redirect('/places/%d/' % (scene.id,))
+
+
+def view_scene(request, scene_id):
+  scene = Scene.objects.get(id=scene_id)
+  return render(request, 'scene.html', {'scene': scene})
