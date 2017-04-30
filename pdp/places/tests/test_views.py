@@ -44,5 +44,7 @@ class NewSceneTest(TestCase):
     self.assertContains(response, expected_error)
 
   def test_invalid_scenes_arent_saved(self):
-    self.client.post('/places/new', data={'item_text': ''})
+    self.client.post('/places/new', data={'item_text': '',
+                                          'lng': -122.41575,
+                                          'lat': 37.749202})
     self.assertEqual(Scene.objects.count(), 0)
