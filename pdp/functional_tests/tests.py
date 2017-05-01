@@ -7,7 +7,10 @@ class HomePageVisitTestCase(unittest.TestCase):
   """docstring for HomePageVisitTestCase"""
 
   def setUp(self):
-    self.browser = webdriver.Chrome()
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.binary_location = '/Applications/Google Chrome Canary.app/'
+    chrome_options.binary_location += 'Contents/MacOS/Google Chrome Canary'
+    self.browser = webdriver.Chrome(chrome_options=chrome_options)
 
   def tearDown(self):
     self.browser.quit()
@@ -20,7 +23,10 @@ class HomePageVisitTestCase(unittest.TestCase):
 class NewVisitorTestCase(LiveServerTestCase):
 
   def setUp(self):
-    self.browser = webdriver.Chrome()
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.binary_location = '/Applications/Google Chrome Canary.app/'
+    chrome_options.binary_location += 'Contents/MacOS/Google Chrome Canary'
+    self.browser = webdriver.Chrome(chrome_options=chrome_options)
 
   def tearDown(self):
     self.browser.quit()
