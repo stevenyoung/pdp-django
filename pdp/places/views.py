@@ -9,13 +9,16 @@ def home_page(request):
 
 
 def new_scene(request):
-  lng = request.POST['lng']
-  lat = request.POST['lat']
-  scene = Scene.objects.create(
-    latitude=lat,
-    longitude=lng,
-    description=request.POST['description'])
-  return redirect('/places/%d/' % (scene.id,))
+  try:
+    lng = request.POST['lng']
+    lat = request.POST['lat']
+    scene = Scene.objects.create(
+      latitude=lat,
+      longitude=lng,
+      description=request.POST['description'])
+    return redirect('/places/%d/' % (scene.id,))
+  except KeyError:
+    return redirect('/')
 
 
 def view_scene(request, scene_id):
