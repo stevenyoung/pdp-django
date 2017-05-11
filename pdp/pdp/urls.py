@@ -17,11 +17,11 @@ from django.conf.urls import include
 from django.conf.urls import url
 from django.contrib import admin
 
-from places import views
+from places.views import HomePageView
 from places import urls as places_urls
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^places/', include(places_urls)),
-    url(r'^$', views.home_page, name='home')
+    url(r'^$', HomePageView.as_view(), name='home')
 ]
