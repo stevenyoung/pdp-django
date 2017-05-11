@@ -53,7 +53,9 @@ GitHub.sublime-settings
 [Ll]ocal
 [Ss]cripts
 pyvenv.cfg
-.venv
+venv
+py2
+py3
 pip-selfcheck.json
 
 # End of https://www.gitignore.io/api/django,sublimetext,virtualenv
