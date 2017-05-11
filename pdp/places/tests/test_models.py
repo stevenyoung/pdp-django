@@ -16,6 +16,7 @@ from places.models import Book
 class ArtistModelTest(TestCase):
   def test_creating_a_new_artist(self):
     a_ = Artist.objects.create()
+    self.assertIsInstance(a_, Artist)
 
 
 class ArtworkModelTest(TestCase):
