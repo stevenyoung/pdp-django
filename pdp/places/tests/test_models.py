@@ -41,16 +41,25 @@ class SceneModelTest(TestCase):
     scene.longitude = -122.41575
     scene.latitude = 37.749202
     scene.save()
+    self.assertEqual(Scene.objects.count(), 1)
+    scene.delete()
+    self.assertEqual(Scene.objects.count(), 0)
 
   def test_saving_a_movie_to_a_scene(self):
     a_ = Director.objects.create()
     m_ = Movie.objects.create(artist=a_)
 
     scene = Scene(artwork=m_)
+    scene.description = 'the first list item described'
+    scene.notes = 'noted'
     scene.longitude = -122.41575
     scene.latitude = 37.749202
 
     scene.save()
+    self.assertEqual(Scene.objects.count(), 1)
+    scene.delete()
+    scene.full_clean()
+    self.assertEqual(Scene.objects.count(), 0)
 
 
 class AuthorModelTest(TestCase):
