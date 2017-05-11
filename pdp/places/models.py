@@ -9,7 +9,7 @@ class Artist(models.Model):
 
 
 class Artwork(models.Model):
-  title = models.TextField(default='')
+  title = models.TextField(default='Untitled')
   artist = models.ForeignKey(Artist, default=None)
 
 
@@ -48,7 +48,6 @@ class Book(Artwork):
 
 
 class Scene(models.Model):
-  artist = models.ForeignKey(Artist, default=None)
   artwork = models.ForeignKey(Artwork, default=None)
   description = models.TextField(default='')
   notes = models.TextField(default='')
