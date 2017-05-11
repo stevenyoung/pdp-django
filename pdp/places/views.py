@@ -1,5 +1,9 @@
+from django.core import serializers
+from django.http import JsonResponse
+
 from django.shortcuts import redirect
 from django.shortcuts import render
+from django.shortcuts import get_object_or_404
 
 from django.views import View
 
@@ -31,24 +35,12 @@ class HomePageView(View):
       return redirect('/')
 
 
-def new_scene(request):
-  try:
-    lng = request.POST['lng']
-    lat = request.POST['lat']
-    scene = Scene.objects.create(
-      latitude=lat,
-      longitude=lng,
-      description=request.POST['description'])
-    return redirect('/places/%d/' % (scene.id,))
-  except KeyError:
-    return redirect('/')
-
-
 def view_scene(request, scene_id):
-  scene = Scene.objects.get(id=scene_id)
+  scene = get_object_or_404(Scene, id=scene_id)
   return render(request, 'scene.html', {'scene': scene})
 
 
-def search(request, search_term):
-  print(search_term)
-  pass
+def search_scenes(request, search_term):
+  scenes = Scene.objects.filter(artwork__title__contains=search_term)
+  data = serializers.serialize('json', scenes)
+  return JsonResponse({'data': data})
