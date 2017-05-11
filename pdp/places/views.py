@@ -26,7 +26,7 @@ class HomePageView(View):
         latitude=lat,
         longitude=lng,
         description=request.POST['description'])
-      return redirect('/places/%d/' % (scene.id,))
+      return redirect('/places/%d/' % (scene.id))
     except KeyError:
       return redirect('/')
 

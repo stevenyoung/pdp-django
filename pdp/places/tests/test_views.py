@@ -20,24 +20,7 @@ class HomePageTest(TestCase):
 
 class NewSceneTest(TestCase):
 
-  def test_can_save_a_POST_request(self):
-    data = {
-      'artist': {'full_name': 'Bad Brains'},
-      'description': 'can save a post request',
-      'lng': -122.41575,
-      'lat': 37.749202,
-      'artwork': 'Banned in D.C.'
-    }
-    self.client.post('/places/new', data=data)
-
-    self.assertEqual(Scene.objects.count(), 1)
-    new_item = Scene.objects.first()
-    self.assertEqual(new_item.id, 1)
-    self.assertEqual(new_item.description, 'can save a post request')
-    self.assertEqual(new_item.longitude, -122.41575)
-    self.assertEqual(new_item.latitude, 37.749202)
-
-  def test_redirects_after_POST(self):
+  def test_redirects_to_new_scene_after_POST(self):
     c = Client()
     data = {
       'artist': {'full_name': 'Bad Brains'},
@@ -47,10 +30,27 @@ class NewSceneTest(TestCase):
       'artwork': 'Banned in D.C.'
     }
     response = c.post('/places/new', data=data)
-    newest_scene_id = Scene.objects.count()
-    newest_scene_url = '/places/' + newest_scene_id + '/'
+    newest_scene_url = '/places/' + str(Scene.objects.count() + 1) + '/'
     self.assertEqual(response.url, newest_scene_url)
     self.assertEqual(response.status_code, 302)
+
+  def test_can_save_a_POST_request(self):
+    data = {
+      'artist': {'full_name': 'Alien Life Form'},
+      'description': 'can save a post request',
+      'lng': -122.41575,
+      'lat': 37.749202,
+      'artwork': 'ALF Sings!'
+    }
+    self.client.post('/places/new', data=data)
+
+    self.assertEqual(Scene.objects.count(), 1)
+    new_item = Scene.objects.first()
+    self.assertEqual(new_item.id, 1)
+    self.assertEqual(new_item.artwork.title, 'ALF Sings!')
+    self.assertEqual(new_item.description, 'can save a post request')
+    self.assertEqual(new_item.longitude, -122.41575)
+    self.assertEqual(new_item.latitude, 37.749202)
 
   def test_invalid_scenes_arent_saved(self):
     self.client.post('/places/new', data={'item_text': 'invalid field',
