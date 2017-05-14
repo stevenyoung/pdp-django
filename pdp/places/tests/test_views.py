@@ -18,39 +18,54 @@ class HomePageTest(TestCase):
   self.assertTemplateUsed(response, 'index.html')
 
 
+SAMPLES = [{'artist': {'full_name': 'Bad Brains'},
+            'description': 'can save a post request',
+            'lng': -122.41575,
+            'lat': 37.749202,
+            'artwork': 'Banned in D.C.'
+            },
+           {'artist': {'full_name': 'Alien Life Form'},
+            'description': 'can save a post request',
+            'lng': -122.41575,
+            'lat': 37.749202,
+            'artwork': 'ALF Sings!'
+            }]
+
+
 class NewSceneTest(TestCase):
 
-  def test_redirects_to_new_scene_after_POST(self):
-    c = Client()
-    data = {
+  def setUp(self):
+    self.sample_data = [{
       'artist': {'full_name': 'Bad Brains'},
       'description': 'can save a post request',
       'lng': -122.41575,
       'lat': 37.749202,
       'artwork': 'Banned in D.C.'
-    }
-    response = c.post('/places/new', data=data)
-    newest_scene_url = '/places/' + str(Scene.objects.count() + 1) + '/'
-    self.assertEqual(response.url, newest_scene_url)
-    self.assertEqual(response.status_code, 302)
-
-  def test_can_save_a_POST_request(self):
-    data = {
+    }, {
       'artist': {'full_name': 'Alien Life Form'},
       'description': 'can save a post request',
       'lng': -122.41575,
       'lat': 37.749202,
       'artwork': 'ALF Sings!'
-    }
-    self.client.post('/places/new', data=data)
+    }]
+    Scene.objects.all().delete()
 
+  def test_can_save_a_POST_request(self):
+    self.assertEqual(Scene.objects.count(), 0)
+    self.client.post('/places/new', data=self.sample_data[1])
     self.assertEqual(Scene.objects.count(), 1)
     new_item = Scene.objects.first()
-    self.assertEqual(new_item.id, 1)
     self.assertEqual(new_item.artwork.title, 'ALF Sings!')
     self.assertEqual(new_item.description, 'can save a post request')
     self.assertEqual(new_item.longitude, -122.41575)
     self.assertEqual(new_item.latitude, 37.749202)
+
+  def test_redirects_to_new_scene_after_POST(self):
+    self.assertEqual(Scene.objects.count(), 0)
+    c = Client()
+    response = c.post('/places/new', data=self.sample_data[0])
+    self.assertEqual(response.status_code, 302)
+    self.assertRegex(response.url, '^/places/[0-9]')
 
   def test_invalid_scenes_arent_saved(self):
     self.client.post('/places/new', data={'item_text': 'invalid field',
@@ -71,3 +86,19 @@ class SearchViewsTest(TestCase):
   def test_can_search_for_a_term(self):
     response = self.client.get('/places/search/blue')
     self.assertEqual(response.status_code, 200)
+
+
+class SceneViewTest(TestCase):
+
+  def test_uses_scene_template(self):
+    self.client.post('/places/new', data=SAMPLES[1])
+    self.assertEqual(Scene.objects.count(), 1)
+    response = self.client.get('/places/1')
+    self.assertTemplateUsed(response, 'scene.html')
+
+  def test_can_view_scene(self):
+    self.client.post('/places/new', data=SAMPLES[1])
+    self.assertEqual(Scene.objects.count(), 1)
+    response = self.client.get('/places/1')
+    self.assertEqual(response.status_code, 301)
+    self.assertContains(response, 'Banned', status_code=301)
