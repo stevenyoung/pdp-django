@@ -6,13 +6,6 @@ from places.models import Artwork
 from places.models import Scene
 
 
-class NewSceneEndpointTest(TestCase):
-  def test_endpoint_post_redirects_to_home_page(self):
-    response = self.client.post('/places/new', {'title': 'new title'})
-    self.assertEqual(response.url, '/')
-    self.assertEqual(response.status_code, 302)
-
-
 class HomePageTest(TestCase):
 
  def test_uses_home_template(self):
