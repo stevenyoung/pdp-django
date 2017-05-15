@@ -1,5 +1,6 @@
 from django.core import serializers
 from django.http import JsonResponse
+from django.forms.models import model_to_dict
 
 from django.shortcuts import redirect
 from django.shortcuts import render
@@ -50,3 +51,8 @@ def search_scenes(request, search_term):
   scenes = Scene.objects.filter(artwork__title__contains=search_term)
   data = serializers.serialize('json', scenes)
   return JsonResponse({'data': data})
+
+
+def get_scene_data(request, scene_id):
+  scene = get_object_or_404(Scene, id=scene_id)
+  return JsonResponse({'data': model_to_dict(scene)})
