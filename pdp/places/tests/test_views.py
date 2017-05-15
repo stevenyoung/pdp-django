@@ -1,6 +1,8 @@
 from django.test import Client
 from django.test import TestCase
 
+from places.models import Artist
+from places.models import Artwork
 from places.models import Scene
 
 
@@ -18,36 +20,24 @@ class HomePageTest(TestCase):
   self.assertTemplateUsed(response, 'index.html')
 
 
-SAMPLES = [{'artist': {'full_name': 'Bad Brains'},
-            'description': 'can save a post request',
-            'lng': -122.41575,
-            'lat': 37.749202,
-            'artwork': 'Banned in D.C.'
-            },
-           {'artist': {'full_name': 'Alien Life Form'},
-            'description': 'can save a post request',
-            'lng': -122.41575,
-            'lat': 37.749202,
-            'artwork': 'ALF Sings!'
-            }]
+SAMPLE_POSTS = [{'artist': {'full_name': 'Bad Brains'},
+                 'description': 'can save a post request',
+                 'lng': -122.41575,
+                 'lat': 37.749202,
+                 'artwork': 'Banned in D.C.'
+                 },
+                {'artist': {'full_name': 'Alien Life Form'},
+                 'description': 'can save a post request',
+                 'lng': -122.41575,
+                 'lat': 37.749202,
+                 'artwork': 'ALF Sings!'
+                 }]
 
 
 class NewSceneTest(TestCase):
 
   def setUp(self):
-    self.sample_data = [{
-      'artist': {'full_name': 'Bad Brains'},
-      'description': 'can save a post request',
-      'lng': -122.41575,
-      'lat': 37.749202,
-      'artwork': 'Banned in D.C.'
-    }, {
-      'artist': {'full_name': 'Alien Life Form'},
-      'description': 'can save a post request',
-      'lng': -122.41575,
-      'lat': 37.749202,
-      'artwork': 'ALF Sings!'
-    }]
+    self.sample_data = SAMPLE_POSTS
     Scene.objects.all().delete()
 
   def test_can_save_a_POST_request(self):
@@ -90,15 +80,27 @@ class SearchViewsTest(TestCase):
 
 class SceneViewTest(TestCase):
 
+  def setUp(self):
+    artist_ = Artist.objects.create(full_name="unknown")
+    artwork_ = Artwork.objects.create(artist=artist_, title='Banned in D.C.')
+    scene = Scene()
+    scene.description = 'can save a post request',
+    scene.longitude = -122.41575
+    scene.latitude = 37.749202
+    scene.artwork = artwork_
+    scene.save()
+    new_item = Scene.objects.first()
+    self.new_scene_url = '/places/' + str(new_item.id)
+
   def test_uses_scene_template(self):
-    self.client.post('/places/new', data=SAMPLES[1])
     self.assertEqual(Scene.objects.count(), 1)
-    response = self.client.get('/places/1')
+    response = self.client.get(self.new_scene_url)
     self.assertTemplateUsed(response, 'scene.html')
 
-  def test_can_view_scene(self):
-    self.client.post('/places/new', data=SAMPLES[1])
-    self.assertEqual(Scene.objects.count(), 1)
-    response = self.client.get('/places/1')
-    self.assertEqual(response.status_code, 301)
-    self.assertContains(response, 'Banned', status_code=301)
+  def test_viewing_scene_returns_status_200(self):
+    response = self.client.get(self.new_scene_url)
+    self.assertEqual(response.status_code, 200)
+
+  def test_scene_view_shows_artwork_title(self):
+    response = self.client.get(self.new_scene_url)
+    self.assertContains(response, 'Banned')
