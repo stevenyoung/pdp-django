@@ -55,4 +55,7 @@ def search_scenes(request, search_term):
 
 def get_scene_data(request, scene_id):
   scene = get_object_or_404(Scene, id=scene_id)
-  return JsonResponse({'data': model_to_dict(scene)})
+  data = model_to_dict(scene)
+  data['title'] = scene.artwork.title
+  data['artist'] = scene.artwork.artist.full_name
+  return JsonResponse({'data': data})

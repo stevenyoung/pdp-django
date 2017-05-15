@@ -74,7 +74,7 @@ class SearchViewsTest(TestCase):
 class SceneViewTest(TestCase):
 
   def setUp(self):
-    artist_ = Artist.objects.create(full_name="unknown")
+    artist_ = Artist.objects.create(full_name="Bad Brains")
     artwork_ = Artwork.objects.create(artist=artist_, title='Banned in D.C.')
     scene = Scene()
     scene.description = 'can save a post request',
@@ -98,10 +98,14 @@ class SceneViewTest(TestCase):
     response = self.client.get(self.new_scene_url)
     self.assertContains(response, 'Banned')
 
+  def test_scene_view_shows_artwork_artist(self):
+    response = self.client.get(self.new_scene_url)
+    self.assertContains(response, 'Bad Brains')
+
 
 class SceneAPITest(TestCase):
   def setUp(self):
-    artist_ = Artist.objects.create(full_name="unknown")
+    artist_ = Artist.objects.create(full_name="bad brains")
     artwork_ = Artwork.objects.create(artist=artist_, title='Banned in D.C.')
     scene = Scene()
     scene.description = 'can save a post request',
@@ -120,3 +124,8 @@ class SceneAPITest(TestCase):
     response = self.client.get(self.new_scene_url)
     self.assertContains(response, '-122.41575')
     self.assertContains(response, '37.749202')
+
+  def test_artwork_data_available_in_api_response(self):
+    response = self.client.get(self.new_scene_url)
+    self.assertContains(response, 'bad brains')
+    self.assertContains(response, 'Banned in D.C.')
