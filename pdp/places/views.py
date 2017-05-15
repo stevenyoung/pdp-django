@@ -17,6 +17,12 @@ class HomePageView(View):
   def get(self, request):
     return render(request, 'index.html')
 
+
+class NewSceneView(View):
+
+  def get(self, request):
+    return render(request, 'new_scene_form.html')
+
   def post(self, request):
     try:
       title = request.POST['artwork']

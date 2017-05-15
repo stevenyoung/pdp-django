@@ -6,13 +6,6 @@ from places.models import Artwork
 from places.models import Scene
 
 
-class HomePageTest(TestCase):
-
- def test_uses_home_template(self):
-  response = self.client.get('/')
-  self.assertTemplateUsed(response, 'index.html')
-
-
 SAMPLE_POSTS = [{'artist': {'full_name': 'Bad Brains'},
                  'description': 'can save a post request',
                  'lng': -122.41575,
@@ -25,6 +18,13 @@ SAMPLE_POSTS = [{'artist': {'full_name': 'Bad Brains'},
                  'lat': 37.749202,
                  'artwork': 'ALF Sings!'
                  }]
+
+
+class HomePageTest(TestCase):
+
+ def test_uses_home_template(self):
+  response = self.client.get('/')
+  self.assertTemplateUsed(response, 'index.html')
 
 
 class NewSceneTest(TestCase):
