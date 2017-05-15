@@ -4,7 +4,10 @@
   </head>
   <body>
     <div>
-      <h2 id="scene_desc">{{ scene.description }}</h2>
+      <h2 id="scene_title">{{ scene.artwork.title }}</h2>
+      <h3 id="scene_artist">{{ scene.artwork.artist.full_name }}</h3>
+      <h4>{{ scene.latitude }}, {{ scene.longitude }}</h4>
+      <h4 id="scene_desc">{{ scene.description }}</h3>
     </div>
   </body>
 </html>
