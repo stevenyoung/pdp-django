@@ -61,6 +61,22 @@ class SceneModelTest(TestCase):
     scene.full_clean()
     self.assertEqual(Scene.objects.count(), 0)
 
+  def test_to_dict_instance_method(self):
+    author_ = Author.objects.create(first_name="First", last_name="Last")
+    work_ = Artwork.objects.create(title="Artwork Title", artist=author_)
+    scene = Scene(artwork=work_)
+    scene.description = 'the first list item described'
+    scene.notes = 'noted'
+    scene.longitude = -122.41575
+    scene.latitude = 37.749202
+    scene.save()
+    self.assertIn('latitude', scene.to_dict())
+    self.assertIn('artwork', scene.to_dict())
+    self.assertIn('artist', scene.to_dict())
+    self.assertEqual(Scene.objects.count(), 1)
+    scene.delete()
+    scene.full_clean()
+    self.assertEqual(Scene.objects.count(), 0)
 
 class AuthorModelTest(TestCase):
 

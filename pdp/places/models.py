@@ -54,3 +54,14 @@ class Scene(models.Model):
   latitude = models.FloatField()
   longitude = models.FloatField()
   submitted_by = User()
+
+  def to_dict(self):
+    data = {}
+    data['id'] = self.id
+    data['artist'] = self.artwork.artist.full_name
+    data['artwork'] = self.artwork.title
+    data['description'] = self.description
+    data['notes'] = self.notes
+    data['latitude'] = self.latitude
+    data['longitude'] = self.longitude
+    return data
