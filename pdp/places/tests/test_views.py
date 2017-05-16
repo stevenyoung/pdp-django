@@ -65,10 +65,29 @@ class NewSceneTest(TestCase):
 
 
 class SearchViewsTest(TestCase):
-  """docstring for SearchViewsTest"""
-  def test_can_search_for_a_term(self):
+
+  def test_search_request_returns_status_200(self):
     response = self.client.get('/places/search/blue')
     self.assertEqual(response.status_code, 200)
+
+  def test_search_request_returns_search_term(self):
+    response = self.client.get('/places/search/blue')
+    self.assertContains(response, '"query": "blue"')
+
+  def test_search_returns_new_matches_with_query(self):
+    artist_ = Artist.objects.create(full_name="Bad Brains")
+    artwork_ = Artwork.objects.create(artist=artist_, title='Banned in D.C.')
+    scene = Scene()
+    scene.description = 'can save a post request',
+    scene.longitude = -122.41575
+    scene.latitude = 37.749202
+    scene.artwork = artwork_
+    scene.save()
+    new_item = Scene.objects.first()
+    response = self.client.get('/places/search/Banned')
+    self.assertContains(response, '"query": "Banned"')
+    self.assertContains(response, new_item.artwork.title)
+    self.assertContains(response, new_item.artwork.artist.full_name)
 
 
 class SceneViewTest(TestCase):

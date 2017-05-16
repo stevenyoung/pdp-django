@@ -1,4 +1,3 @@
-from django.core import serializers
 from django.http import JsonResponse
 from django.forms.models import model_to_dict
 
@@ -48,9 +47,13 @@ def view_scene(request, scene_id):
 
 
 def search_scenes(request, search_term):
-  scenes = Scene.objects.filter(artwork__title__contains=search_term)
-  data = serializers.serialize('json', scenes)
-  return JsonResponse({'data': data})
+  title_matches = [scene.to_dict() for scene in Scene.objects.filter(
+      artwork__title__contains=search_term)]
+  author_matches = [scene.to_dict() for scene in Scene.objects.filter(
+    artwork__artist__full_name__contains=search_term)]
+  matching_scenes = title_matches + author_matches
+  response = {'results': {'query': search_term, 'scenes': matching_scenes}}
+  return JsonResponse({'data': response})
 
 
 def get_scene_data(request, scene_id):
