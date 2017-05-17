@@ -14,12 +14,14 @@ from places.models import Book
 
 
 class ArtistModelTest(TestCase):
+
   def test_creating_a_new_artist(self):
     a_ = Artist.objects.create()
     self.assertIsInstance(a_, Artist)
 
 
 class ArtworkModelTest(TestCase):
+
   def test_cannot_save_artwork_without_artist(self):
     work_ = Artwork()
     with self.assertRaises(IntegrityError):
@@ -52,6 +54,7 @@ class SceneModelTest(TestCase):
     scene = Scene(artwork=m_)
     scene.description = 'the first list item described'
     scene.notes = 'noted'
+    scene.name = 'scene name'
     scene.longitude = -122.41575
     scene.latitude = 37.749202
 
@@ -67,6 +70,7 @@ class SceneModelTest(TestCase):
     scene = Scene(artwork=work_)
     scene.description = 'the first list item described'
     scene.notes = 'noted'
+    scene.name = 'Scene Name'
     scene.longitude = -122.41575
     scene.latitude = 37.749202
     scene.save()
@@ -77,6 +81,10 @@ class SceneModelTest(TestCase):
     scene.delete()
     scene.full_clean()
     self.assertEqual(Scene.objects.count(), 0)
+
+  def test_scene_supports_spatial_fields(self):
+    self.fail('finish it!')
+
 
 class AuthorModelTest(TestCase):
 
