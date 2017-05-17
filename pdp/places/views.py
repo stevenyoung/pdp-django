@@ -48,9 +48,9 @@ def view_scene(request, scene_id):
 
 def search_scenes(request, search_term):
   title_matches = [{'place': scene.to_dict()} for scene in Scene.objects.filter(
-      artwork__title__contains=search_term)]
+      artwork__title__icontains=search_term)]
   author_matches = [{'place': scene.to_dict()} for scene in Scene.objects.filter(
-    artwork__artist__full_name__contains=search_term)]
+    artwork__artist__full_name__icontains=search_term)]
   matches = title_matches + author_matches
   return JsonResponse({'query': search_term, 'result': matches})
 

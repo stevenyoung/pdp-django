@@ -89,6 +89,21 @@ class SearchViewsTest(TestCase):
     self.assertContains(response, new_item.artwork.title)
     self.assertContains(response, new_item.artwork.artist.full_name)
 
+  def test_text_queries_are_case_insensitive(self):
+    artist_ = Artist.objects.create(full_name="Bad Brains")
+    artwork_ = Artwork.objects.create(artist=artist_, title='Banned in D.C.')
+    scene = Scene()
+    scene.description = 'can save a post request',
+    scene.longitude = -122.41575
+    scene.latitude = 37.749202
+    scene.artwork = artwork_
+    scene.save()
+    new_item = Scene.objects.first()
+    response = self.client.get('/places/search/banned')
+    self.assertContains(response, '"query": "banned"')
+    self.assertContains(response, new_item.artwork.title)
+    self.assertContains(response, new_item.artwork.artist.full_name)
+
 
 class SceneViewTest(TestCase):
 
@@ -123,6 +138,7 @@ class SceneViewTest(TestCase):
 
 
 class SceneAPITest(TestCase):
+
   def setUp(self):
     artist_ = Artist.objects.create(full_name="bad brains")
     artwork_ = Artwork.objects.create(artist=artist_, title='Banned in D.C.')
