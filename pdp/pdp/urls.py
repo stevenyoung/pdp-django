@@ -18,10 +18,12 @@ from django.conf.urls import url
 from django.contrib import admin
 
 from places.views import HomePageView
+from places.views import search_scenes
 from places import urls as places_urls
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^places/', include(places_urls)),
+    url(r'^search/(?P<search_term>[-\w]+)', search_scenes, name='places_search'),
     url(r'^$', HomePageView.as_view(), name='home')
 ]
