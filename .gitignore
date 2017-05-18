@@ -58,4 +58,7 @@ py2
 py3
 pip-selfcheck.json
 
+#personal, go away!
+sy
+
 # End of https://www.gitignore.io/api/django,sublimetext,virtualenv
