@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.gis.db.models import PointField
 from django.contrib.auth.models import User
 
 
@@ -6,6 +7,11 @@ class Artist(models.Model):
   first_name = models.TextField(default='')
   last_name = models.TextField(default='')
   full_name = models.TextField(default='')
+
+  def save(self, *args, **kwargs):
+    if self.full_name == '':
+      self.full_name = '{} {}'.format(self.first_name, self.last_name)
+    super().save(*args, **kwargs)
 
 
 class Artwork(models.Model):
@@ -55,6 +61,7 @@ class Scene(models.Model):
   longitude = models.FloatField()
   submitted_by = User()
   name = models.TextField(default='')
+  coordinates = PointField(geography=True, null=True, blank=True)
 
   def to_dict(self):
     data = {}

@@ -19,6 +19,10 @@ class ArtistModelTest(TestCase):
     a_ = Artist.objects.create()
     self.assertIsInstance(a_, Artist)
 
+  def test_full_name_from_first_and_last(self):
+    a_ = Artist.objects.create(first_name="First", last_name="Last")
+    self.assertEqual("First Last", a_.full_name)
+
 
 class ArtworkModelTest(TestCase):
 
@@ -35,10 +39,13 @@ class ArtworkModelTest(TestCase):
 
 class SceneModelTest(TestCase):
 
+  def setUp(self):
+    self.artist_ = Author.objects.create(first_name='First', last_name='Last')
+    self.artwork_ = Artwork.objects.create(title='Artwork Title',
+                                           artist=self.artist_)
+
   def test_saving_and_retrieving_scene_descriptions(self):
-    author_ = Author.objects.create(first_name="First", last_name="Last")
-    work_ = Artwork.objects.create(title="Artwork Title", artist=author_)
-    scene = Scene(artwork=work_)
+    scene = Scene(artwork=self.artwork_)
     scene.description = 'the first list item described'
     scene.longitude = -122.41575
     scene.latitude = 37.749202
@@ -57,7 +64,6 @@ class SceneModelTest(TestCase):
     scene.name = 'scene name'
     scene.longitude = -122.41575
     scene.latitude = 37.749202
-
     scene.save()
     self.assertEqual(Scene.objects.count(), 1)
     scene.delete()
@@ -83,6 +89,7 @@ class SceneModelTest(TestCase):
     self.assertEqual(Scene.objects.count(), 0)
 
   def test_scene_supports_spatial_fields(self):
+
     self.fail('finish it!')
 
 
