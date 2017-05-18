@@ -29,8 +29,8 @@ class NewSceneView(View):
       posted_artist = request.POST['artist']
       artist_ = Artist.objects.create(full_name=posted_artist)
       artwork_ = Artwork.objects.create(title=title, artist=artist_)
-      lng = request.POST['lng']
-      lat = request.POST['lat']
+      lng = float(request.POST['lng'])
+      lat = float(request.POST['lat'])
       scene = Scene.objects.create(
         artwork=artwork_,
         latitude=lat,
@@ -39,11 +39,6 @@ class NewSceneView(View):
       return redirect('/places/%d/' % (scene.id))
     except KeyError:
       return redirect('/')
-
-
-def view_scene(request, scene_id):
-  scene = get_object_or_404(Scene, id=scene_id)
-  return render(request, 'scene.html', {'scene': scene})
 
 
 def search_scenes(request, search_term):
@@ -55,9 +50,21 @@ def search_scenes(request, search_term):
   return JsonResponse({'query': search_term, 'result': matches})
 
 
+def nearby_scenes(request, lat, lng):
+  qs = Scene.objects.distance_filter(lat, lng)
+  matches = [{'place': scene.to_dict()} for scene in qs]
+  return JsonResponse({'query': {'lat': lat, 'lng': lng}, 'result': [matches]})
+
+
+def view_scene(request, scene_id):
+  scene = get_object_or_404(Scene, id=scene_id)
+  return render(request, 'scene.html', {'scene': scene})
+
+
 def get_scene_data(request, scene_id):
   scene = get_object_or_404(Scene, id=scene_id)
   data = model_to_dict(scene)
+  data['coordinates'] = None
   data['title'] = scene.artwork.title
   data['artist'] = scene.artwork.artist.full_name
   return JsonResponse({'data': data})
