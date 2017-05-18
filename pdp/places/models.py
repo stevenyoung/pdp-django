@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.geos import Point
+from django.contrib.gis.measure import D
 from django.contrib.gis.db.models import PointField
 from django.contrib.auth.models import User
 
@@ -55,6 +56,14 @@ class Book(Artwork):
   author = models.ManyToManyField(Author)
 
 
+class SceneDistanceManager(models.Manager):
+
+  def distance_filter(self, lat, lng):
+    pnt = GEOSGeometry(Point(float(lng), float(lat)))
+    qs = Scene.objects.filter(coordinates__dwithin=(pnt, D(mi=100)))
+    return qs
+
+
 class Scene(models.Model):
   artwork = models.ForeignKey(Artwork, default=None)
   description = models.TextField(default='')
@@ -64,6 +73,7 @@ class Scene(models.Model):
   submitted_by = User()
   name = models.TextField(default='')
   coordinates = PointField(geography=True, null=True, blank=True)
+  objects = SceneDistanceManager()
 
   def to_dict(self):
     data = {}
@@ -81,6 +91,5 @@ class Scene(models.Model):
 
   def save(self, *args, **kwargs):
     if isinstance(self.latitude, float) and isinstance(self.longitude, float):
-      point = Point(self.longitude, self.latitude)
-      self.coordinates = GEOSGeometry(point)
+      self.coordinates = GEOSGeometry(Point(self.latitude, self.longitude))
       super().save(*args, **kwargs)
