@@ -6,7 +6,7 @@ urlpatterns = [
       views.get_scene_data, name='api_scene_data'),
   url(r'^new$', views.NewSceneView.as_view(), name='new_place'),
   url(r'^home$', views.HomePageView.as_view(), name='places_home'),
-  url(r'^near/(?P<lng>[-+]?[0-9]*\.?[0-9]+)/(?P<lat>[-+]?[0-9]*\.?[0-9]+)',
+  url(r'^near/(?P<lat>[-+]?[0-9]*\.?[0-9]+)/(?P<lng>[-+]?[0-9]*\.?[0-9]+)',
       views.nearby_scenes, name='places_nearby'),
   url(r'^search/(?P<search_term>[-\w]+)',
       views.search_scenes, name='places_search'),
