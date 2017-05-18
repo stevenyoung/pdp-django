@@ -1,6 +1,8 @@
 from django.test import TestCase
 from django.db.utils import IntegrityError
 
+from django.contrib.gis.geos import Point
+
 from places.models import Scene
 
 from places.models import Artist
@@ -102,7 +104,7 @@ class SceneModelTest(TestCase):
     self.assertIsNotNone(scene.latitude)
     self.assertIsNotNone(scene.longitude)
     self.assertIsNotNone(scene.coordinates)
-
+    self.assertIsInstance(scene.coordinates, Point)
 
 
 class AuthorModelTest(TestCase):

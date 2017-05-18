@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models import PointField
 from django.contrib.auth.models import User
 
@@ -76,3 +78,9 @@ class Scene(models.Model):
     data['loc'] = {'coordinates': [self.latitude, self.longitude],
                    'type': 'Point'}
     return data
+
+  def save(self, *args, **kwargs):
+    if isinstance(self.latitude, float) and isinstance(self.longitude, float):
+      point = Point(self.longitude, self.latitude)
+      self.coordinates = GEOSGeometry(point)
+      super().save(*args, **kwargs)
