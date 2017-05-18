@@ -78,7 +78,7 @@ class SearchViewsTest(TestCase):
     artist_ = Artist.objects.create(full_name="Bad Brains")
     artwork_ = Artwork.objects.create(artist=artist_, title='Banned in D.C.')
     scene = Scene()
-    scene.description = 'can save a post request',
+    scene.description = 'can save a post request'
     scene.longitude = -122.41575
     scene.latitude = 37.749202
     scene.artwork = artwork_
@@ -103,6 +103,19 @@ class SearchViewsTest(TestCase):
     self.assertContains(response, '"query": "banned"')
     self.assertContains(response, new_item.artwork.title)
     self.assertContains(response, new_item.artwork.artist.full_name)
+
+  def test_can_search_places_by_coords(self):
+    lat = 37.749202
+    lng = -122.41575
+    response = self.client.get('/places/near/%s/%s' % (lng, lat))
+    self.assertEqual(response.status_code, 200)
+
+  def test_coordinate_search_returns_query_dict(self):
+    lat = 37.749202
+    lng = -122.41575
+    response = self.client.get('/places/near/%s/%s' % (lng, lat))
+    self.assertContains(response, lat)
+    self.assertContains(response, lng)
 
 
 class SceneViewTest(TestCase):

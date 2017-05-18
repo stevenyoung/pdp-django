@@ -80,17 +80,29 @@ class SceneModelTest(TestCase):
     scene.longitude = -122.41575
     scene.latitude = 37.749202
     scene.save()
-    self.assertIn('latitude', scene.to_dict())
-    self.assertIn('artwork', scene.to_dict())
-    self.assertIn('artist', scene.to_dict())
-    self.assertEqual(Scene.objects.count(), 1)
-    scene.delete()
-    scene.full_clean()
-    self.assertEqual(Scene.objects.count(), 0)
+    md = {'artist': 'First Last',
+          'artwork': 'Artwork Title',
+          'description': 'the first list item described',
+          'latitude': 37.749202,
+          'loc': {'coordinates': [37.749202, -122.41575], 'type': 'Point'},
+          'longitude': -122.41575,
+          'name': 'Scene Name',
+          'notes': 'noted'}
+    md['id'] = Scene.objects.first().id
+    self.assertDictEqual(scene.to_dict(), md)
 
   def test_scene_supports_spatial_fields(self):
+    author_ = Author.objects.create(first_name="First", last_name="Last")
+    work_ = Artwork.objects.create(title="Artwork Title", artist=author_)
+    scene = Scene(artwork=work_)
+    scene.longitude = -122.41575
+    scene.latitude = 37.749202
 
-    self.fail('finish it!')
+    scene.save()
+    self.assertIsNotNone(scene.latitude)
+    self.assertIsNotNone(scene.longitude)
+    self.assertIsNotNone(scene.coordinates)
+
 
 
 class AuthorModelTest(TestCase):
