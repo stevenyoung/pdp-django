@@ -6,7 +6,7 @@ from places.models import Artwork
 from places.models import Scene
 
 
-SAMPLE_POSTS = [{'artist': {'full_name': 'Bad Brains'},
+SAMPLE_INPUT = [{'artist': {'full_name': 'Bad Brains'},
                  'description': 'can save a post request',
                  'lng': -122.41575,
                  'lat': 37.749202,
@@ -30,7 +30,7 @@ class HomePageTest(TestCase):
 class NewSceneTest(TestCase):
 
   def setUp(self):
-    self.sample_data = SAMPLE_POSTS
+    self.sample_data = SAMPLE_INPUT
     Scene.objects.all().delete()
 
   def test_can_save_a_POST_request(self):
@@ -64,7 +64,17 @@ class NewSceneTest(TestCase):
     self.assertEqual(response['location'], '/')
 
 
-class SearchViewsTest(TestCase):
+class TextSearchViewsTest(TestCase):
+
+  def sample_scene_input(self):
+    artist_ = Artist.objects.create(full_name="Bad Brains")
+    artwork_ = Artwork.objects.create(artist=artist_, title='Banned in D.C.')
+    scene = Scene()
+    scene.description = 'can save a post request'
+    scene.longitude = -122.41575
+    scene.latitude = 37.749202
+    scene.artwork = artwork_
+    return scene
 
   def test_search_request_returns_status_200(self):
     response = self.client.get('/places/search/blue')
@@ -75,13 +85,7 @@ class SearchViewsTest(TestCase):
     self.assertContains(response, '"query": "blue"')
 
   def test_search_returns_new_matches_with_query(self):
-    artist_ = Artist.objects.create(full_name="Bad Brains")
-    artwork_ = Artwork.objects.create(artist=artist_, title='Banned in D.C.')
-    scene = Scene()
-    scene.description = 'can save a post request'
-    scene.longitude = -122.41575
-    scene.latitude = 37.749202
-    scene.artwork = artwork_
+    scene = self.sample_scene_input()
     scene.save()
     new_item = Scene.objects.first()
     response = self.client.get('/places/search/Banned')
@@ -90,19 +94,26 @@ class SearchViewsTest(TestCase):
     self.assertContains(response, new_item.artwork.artist.full_name)
 
   def test_text_queries_are_case_insensitive(self):
-    artist_ = Artist.objects.create(full_name="Bad Brains")
-    artwork_ = Artwork.objects.create(artist=artist_, title='Banned in D.C.')
-    scene = Scene()
-    scene.description = 'can save a post request',
-    scene.longitude = -122.41575
-    scene.latitude = 37.749202
-    scene.artwork = artwork_
+    scene = self.sample_scene_input()
     scene.save()
     new_item = Scene.objects.first()
     response = self.client.get('/places/search/banned')
     self.assertContains(response, '"query": "banned"')
     self.assertContains(response, new_item.artwork.title)
     self.assertContains(response, new_item.artwork.artist.full_name)
+
+
+class CoordinatesSearchViewsTest(TestCase):
+
+  def sample_scene_input(self):
+    artist_ = Artist.objects.create(full_name="Bad Brains")
+    artwork_ = Artwork.objects.create(artist=artist_, title='Banned in D.C.')
+    scene = Scene()
+    scene.description = 'can save a post request'
+    scene.longitude = -122.41575
+    scene.latitude = 37.749202
+    scene.artwork = artwork_
+    return scene
 
   def test_can_search_places_by_coords(self):
     lat = 37.749202
@@ -116,6 +127,18 @@ class SearchViewsTest(TestCase):
     response = self.client.get('/places/near/%s/%s' % (lng, lat))
     self.assertContains(response, lat)
     self.assertContains(response, lng)
+
+  def test_coordinate_search_json_results_are_not_empty(self):
+    # test handling of results from Scene.objects.distance_filter
+    scene = self.sample_scene_input()
+    scene.save()
+    response = self.client.get('/places/near/%s/%s' % (scene.longitude, scene.latitude))
+    self.assertEqual(response.status_code, 200)
+    new_item = Scene.objects.first()
+    self.assertContains(response, new_item.longitude)
+    self.assertContains(response, new_item.latitude)
+    self.assertContains(response, new_item.artwork.title)
+    self.assertContains(response, new_item.artwork.artist.full_name)
 
 
 class SceneViewTest(TestCase):

@@ -42,18 +42,29 @@ class NewSceneView(View):
 
 
 def search_scenes(request, search_term):
-  title_matches = [{'place': scene.to_dict()} for scene in Scene.objects.filter(
-      artwork__title__icontains=search_term)]
-  author_matches = [{'place': scene.to_dict()} for scene in Scene.objects.filter(
-    artwork__artist__full_name__icontains=search_term)]
-  matches = title_matches + author_matches
+  matching_titles = Scene.objects.filter(artwork__title__icontains=search_term)
+  matching_artists = Scene.objects.filter(artwork__artist__full_name__icontains=search_term)
+  matching_scenes = list(matching_titles) + list(matching_artists)
+  matches = []
+  for scene in matching_scenes:
+    data = scene.to_dict()
+    data['lat'] = data['loc']['coordinates'][0]
+    data['lng'] = data['loc']['coordinates'][1]
+    data['scenedescription'] = data['description']
+    matches.append({'place': data})
   return JsonResponse({'query': search_term, 'result': matches})
 
 
 def nearby_scenes(request, lat, lng):
   qs = Scene.objects.distance_filter(lat, lng)
-  matches = [{'place': scene.to_dict()} for scene in qs]
-  return JsonResponse({'query': {'lat': lat, 'lng': lng}, 'result': [matches]})
+  matches = []
+  for scene in qs:
+    data = scene.to_dict()
+    data['lat'] = data['loc']['coordinates'][0]
+    data['lng'] = data['loc']['coordinates'][1]
+    data['scenedescription'] = data['description']
+    matches.append({'place': data})
+  return JsonResponse({'query': {'lat': lat, 'lng': lng}, 'result': matches})
 
 
 def view_scene(request, scene_id):
@@ -64,7 +75,7 @@ def view_scene(request, scene_id):
 def get_scene_data(request, scene_id):
   scene = get_object_or_404(Scene, id=scene_id)
   data = model_to_dict(scene)
-  data['coordinates'] = None
+  del data['coordinates']
   data['title'] = scene.artwork.title
   data['artist'] = scene.artwork.artist.full_name
   return JsonResponse({'data': data})
