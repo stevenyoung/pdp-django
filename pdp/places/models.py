@@ -83,8 +83,6 @@ class Scene(models.Model):
     data['name'] = self.name
     data['description'] = self.description
     data['notes'] = self.notes
-    data['latitude'] = self.latitude
-    data['longitude'] = self.longitude
     data['loc'] = {'coordinates': [self.latitude, self.longitude],
                    'type': 'Point'}
     return data

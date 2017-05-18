@@ -85,9 +85,7 @@ class SceneModelTest(TestCase):
     md = {'artist': 'First Last',
           'artwork': 'Artwork Title',
           'description': 'the first list item described',
-          'latitude': 37.749202,
           'loc': {'coordinates': [37.749202, -122.41575], 'type': 'Point'},
-          'longitude': -122.41575,
           'name': 'Scene Name',
           'notes': 'noted'}
     md['id'] = Scene.objects.first().id
