@@ -9,12 +9,13 @@ from django.contrib.auth.models import User
 class Artist(models.Model):
   first_name = models.TextField(default='')
   last_name = models.TextField(default='')
-  full_name = models.TextField(default='')
+  full_name = models.TextField(unique=True)
 
   def save(self, *args, **kwargs):
-    if self.full_name == '':
-      self.full_name = '{} {}'.format(self.first_name, self.last_name)
-    super().save(*args, **kwargs)
+    if (len(self.first_name) > 0 or len(self.last_name) > 0):
+      if self.full_name == '':
+        self.full_name = '{} {}'.format(self.first_name, self.last_name)
+      super().save(*args, **kwargs)
 
 
 class Artwork(models.Model):

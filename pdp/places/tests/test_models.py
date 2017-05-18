@@ -17,9 +17,17 @@ from places.models import Book
 
 class ArtistModelTest(TestCase):
 
-  def test_creating_a_new_artist(self):
-    a_ = Artist.objects.create()
-    self.assertIsInstance(a_, Artist)
+  def test_a_new_artist_requires_a_name(self):
+    _a = Artist()
+    _a.save()
+    self.assertEqual(Artist.objects.count(), 0)
+
+  def test_cannot_save_existing_artist(self):
+    _a = Artist(first_name='Homer')
+    _a.save()
+    _b = Artist(first_name='Homer')
+    with self.assertRaises(IntegrityError):
+      _b.save()
 
   def test_full_name_from_first_and_last(self):
     a_ = Artist.objects.create(first_name="First", last_name="Last")
@@ -34,7 +42,7 @@ class ArtworkModelTest(TestCase):
       work_.save()
 
   def test_can_save_artwork_with_new_artist(self):
-    artist_ = Artist.objects.create()
+    artist_ = Artist.objects.create(first_name='Homer')
     work_ = Artwork.objects.create(artist=artist_)
     self.assertIs(isinstance(work_, Artwork), True)
 
