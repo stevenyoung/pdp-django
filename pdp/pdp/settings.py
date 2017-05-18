@@ -37,10 +37,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.gis',
+    'corsheaders',
     'places'
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -70,6 +73,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'pdp.wsgi.application'
 
+CORS_ORIGIN_ALLOW_ALL = True
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
@@ -82,25 +86,26 @@ WSGI_APPLICATION = 'pdp.wsgi.application'
 # }
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
+    'mysql': {
+        'ENGINE': 'django.contrib.gis.db.backends.mysql',
         'NAME': 'pdpdj',
         'USER': 'pdpdj',
         'PASSWORD': 'pdpdj',
         'HOST': '127.0.0.1',
         'PORT': '3306'
+    },
+    'spatialite': {
+      'ENGINE': 'django.contrib.gis.db.backends.spatialite',
+      'NAME': os.path.join(BASE_DIR, 'spatialite.sqlite3')
+    },
+    'default': {
+      'ENGINE': 'django.contrib.gis.db.backends.postgis',
+      'NAME': 'pdppostgis',
+      'USER': 'steven',
     }
 }
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'mysql.connector.django',
-#         'NAME': 'pdpdj',
-#         'USER': 'pdpdj',
-#         'PASSWORD': 'pdpdj',
-#     }
-# }
-
+SPATIALITE_LIBRARY_PATH = '/usr/local/lib/mod_spatialite.dylib'
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
