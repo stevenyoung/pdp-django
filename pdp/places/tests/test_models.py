@@ -171,11 +171,12 @@ class BookModelTest(TestCase):
     _auth1 = Author.objects.create(first_name='Homer')
     _auth2 = Author.objects.create(full_name='Virgil')
     book_ = Book.objects.create(artist=_auth1)
-    combined_author = ', '.join([_auth1.full_name, _auth2.full_name])
-    book_.artist = Author.objects.create(full_name=combined_author)
+    book_.author.add(_auth1)
+    book_.author.add(_auth2)
     book_.save()
-    newest = Book.objects.first()
-    self.assertEqual(newest.artist.full_name, 'Homer, Virgil')
+    first = Book.objects.first()
+    self.assertIn(_auth1, first.author.all())
+    self.assertIn(_auth2, first.author.all())
 
 
 class MovieModelTest(TestCase):
@@ -195,4 +196,9 @@ class MovieModelTest(TestCase):
     movie.save()
     self.assertEqual(Movie.objects.count(), 1)
 
-    movie.director
+    movie.director.add(artist_)
+    self.assertIn(artist_, movie.director.all())
+    ed_ = Editor(full_name="Clip Cutter")
+    ed_.save()
+    movie.editor.add(ed_)
+    self.assertIn(ed_, movie.editor.all())
