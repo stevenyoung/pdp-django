@@ -10,10 +10,12 @@ from places.models import Artist
 from places.models import Author
 from places.models import Director
 from places.models import Editor
+from places.models import Composer
 
 from places.models import Artwork
 from places.models import Movie
 from places.models import Book
+from places.models import Song
 
 
 class ArtistModelTest(TestCase):
@@ -202,3 +204,20 @@ class MovieModelTest(TestCase):
     ed_.save()
     movie.editor.add(ed_)
     self.assertIn(ed_, movie.editor.all())
+
+
+class SongModelTest(TestCase):
+
+  def test_can_add_composer_performer_properties(self):
+    c_ = Composer(full_name="Kato")
+    c_.save()
+    self.assertEqual(Composer.objects.count, 1)
+    s_ = Song(artist=c_)
+    s_.save()
+    self.assertEqual(Song.objects.count, 1)
+    s_.composer.add(c_)
+    s_.performer.add(c_)
+    first = Song.objects.first()
+    self.assertIn(c_, first.composer.all())
+    self.assertIn(c_, first.performer.all())
+
