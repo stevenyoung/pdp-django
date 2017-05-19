@@ -65,6 +65,17 @@ class ArtworkModelTest(TestCase):
     artist_ = Artist.objects.create(first_name='Homer')
     work_ = Artwork.objects.create(artist=artist_)
     self.assertIs(isinstance(work_, Artwork), True)
+    first = Artwork.objects.first()
+    self.assertEqual(first.title, 'Untitled')
+    self.assertEqual(Artwork.objects.count(), 1)
+
+  def test_can_save_artwork_with_title(self):
+    artist_ = Artist.objects.create(first_name='Homer')
+    work_ = Artwork.objects.create(title="Odd I See", artist=artist_)
+    self.assertIs(isinstance(work_, Artwork), True)
+    first = Artwork.objects.first()
+    self.assertEqual(first.title, work_.title)
+    self.assertEqual(Artwork.objects.count(), 1)
 
 
 class SceneModelTest(TestCase):
