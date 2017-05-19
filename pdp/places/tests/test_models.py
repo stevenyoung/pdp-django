@@ -27,6 +27,8 @@ class ArtistModelTest(TestCase):
     _a = Artist(first_name='Homer')
     _a.save()
     self.assertEqual(Artist.objects.count(), 1)
+    first = Artist.objects.first()
+    self.assertEqual(first.full_name, 'Homer')
 
   def test_full_name_from_first_and_last(self):
     a_ = Artist.objects.create(first_name="First", last_name="Last")
