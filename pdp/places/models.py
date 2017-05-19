@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.geos import Point
@@ -12,15 +13,19 @@ class Artist(models.Model):
   full_name = models.TextField(unique=True)
 
   def save(self, *args, **kwargs):
-    if (len(self.first_name) > 0 or len(self.last_name) > 0):
+    if len(self.first_name) > 0 or len(self.last_name) > 0:
       if self.full_name == '':
-        self.full_name = '{} {}'.format(self.first_name, self.last_name)
+        self.full_name = '{} {}'.format(self.first_name,
+                                        self.last_name).strip(' ')
+    if len(self.full_name) > 0:
       super().save(*args, **kwargs)
+    else:
+      raise ValidationError('artists need a name!')
 
 
 class Artwork(models.Model):
   title = models.TextField(default='Untitled')
-  artist = models.ForeignKey(Artist, default=None)
+  artist = models.ForeignKey(Artist)
 
 
 class Director(Artist):
