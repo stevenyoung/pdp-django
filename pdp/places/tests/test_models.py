@@ -11,6 +11,7 @@ from places.models import Author
 from places.models import Director
 from places.models import Editor
 from places.models import Composer
+from places.models import Performer
 
 from places.models import Artwork
 from places.models import Movie
@@ -158,15 +159,12 @@ class BookModelTest(TestCase):
   def test_saving_and_retrieving_book(self):
     author_ = Author.objects.create(full_name="Yo Yo")
     book = Book.objects.create(title="Artwork Title", artist=author_)
-    # book.save()
     self.assertIn("Title", book.title)
 
   def test_can_save_same_author_to_different_books(self):
     author_, created = Author.objects.get_or_create(full_name="Homer")
     book1 = Book.objects.create(title="Book 1 Title", artist=author_)
-    # book1.save()
     book2 = Book.objects.create(title="Book 2 Title", artist=author_)
-    # book2.save()
     self.assertEqual(book1.artist, book2.artist)
 
   def test_book_can_have_multiple_authors(self):
@@ -179,6 +177,14 @@ class BookModelTest(TestCase):
     first = Book.objects.first()
     self.assertIn(_auth1, first.author.all())
     self.assertIn(_auth2, first.author.all())
+
+  def test_book_can_be_assigned_to_scene(self):
+    self.assertEqual(Artist.objects.count(), 0)
+    _a = Author(first_name='Homer')
+    _a.save()
+    self.assertEqual(Artist.objects.count(), 1)
+    _b = Book(title="Odd Is He?", artist=_a)
+    _b.save()
 
 
 class MovieModelTest(TestCase):
@@ -205,19 +211,45 @@ class MovieModelTest(TestCase):
     movie.editor.add(ed_)
     self.assertIn(ed_, movie.editor.all())
 
+  def test_cannot_have_same_artist_as_director_and_editor(self):
+    a = Director(first_name="JJ")
+    a.save()
+    mov = Movie(title="MovieMovie")
+    mov.artist = a
+    mov.save()
+    mov.director.add(a)
+    ed = Editor(full_name=a.full_name)
+    with self.assertRaises(IntegrityError):
+      ed.save()
+      mov.editor.add(ed)
+
 
 class SongModelTest(TestCase):
 
   def test_can_add_composer_performer_properties(self):
     c_ = Composer(full_name="Kato")
     c_.save()
-    self.assertEqual(Composer.objects.count, 1)
+    self.assertEqual(Composer.objects.count(), 1)
     s_ = Song(artist=c_)
     s_.save()
-    self.assertEqual(Song.objects.count, 1)
-    s_.composer.add(c_)
-    s_.performer.add(c_)
+    self.assertEqual(Song.objects.count(), 1)
+    s_.composers.add(c_)
+    p_, created = Performer.objects.get_or_create(full_name='Angel')
+    s_.performers.add(p_)
     first = Song.objects.first()
-    self.assertIn(c_, first.composer.all())
-    self.assertIn(c_, first.performer.all())
+    self.assertIn(c_, first.composers.all())
+    self.assertIn(p_, first.performers.all())
 
+  def test_cannot_add_same_artist_as_composer_and_performer(self):
+    c = Composer(first_name='Kato')
+    c.save()
+    with self.assertRaises(IntegrityError):
+      p = Performer.objects.get_or_create(first_name='Kato')
+      p.save()
+      s = Song(artist=c)
+      s.save()
+      s.composer.add(c)
+      s.performer.add(p)
+      first = Song.objects.first()
+      self.assertIn(c, first.composer.all())
+      self.assertIn(c, first.performer.all())

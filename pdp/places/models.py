@@ -54,8 +54,8 @@ class Movie(Artwork):
 
 
 class Song(Artwork):
-  composer = models.ManyToManyField(Composer)
-  performer = models.ManyToManyField(Performer)
+  composers = models.ManyToManyField(Composer)
+  performers = models.ManyToManyField(Performer)
 
 
 class Book(Artwork):
