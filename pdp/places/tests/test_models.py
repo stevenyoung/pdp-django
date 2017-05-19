@@ -80,16 +80,10 @@ class ArtworkModelTest(TestCase):
 
 class SceneModelTest(TestCase):
 
-  def setUp(self):
+  def test_saving_and_retrieving_scene_descriptions(self):
     self.artist_ = Author.objects.create(first_name='First', last_name='Last')
     self.artwork_ = Artwork.objects.create(title='Artwork Title',
                                            artist=self.artist_)
-
-  def tearDown(self):
-    self.artist_.delete()
-    self.artwork_.delete()
-
-  def test_saving_and_retrieving_scene_descriptions(self):
     scene = Scene(artwork=self.artwork_)
     scene.description = 'the first list item described'
     scene.longitude = -122.41575
@@ -100,7 +94,7 @@ class SceneModelTest(TestCase):
     self.assertEqual(Scene.objects.count(), 0)
 
   def test_saving_a_movie_to_a_scene(self):
-    a_ = Director.objects.create()
+    a_ = Director.objects.create(full_name="Skip X")
     m_ = Movie.objects.create(artist=a_)
 
     scene = Scene(artwork=m_)
@@ -111,6 +105,8 @@ class SceneModelTest(TestCase):
     scene.latitude = 37.749202
     scene.save()
     self.assertEqual(Scene.objects.count(), 1)
+    first = Scene.objects.first()
+    self.assertEqual(first.artwork.artist.full_name, a_.full_name)
     scene.delete()
     scene.full_clean()
     self.assertEqual(Scene.objects.count(), 0)
@@ -158,13 +154,13 @@ class AuthorModelTest(TestCase):
 class BookModelTest(TestCase):
 
   def test_saving_and_retrieving_book(self):
-    author_ = Author.objects.create()
+    author_ = Author.objects.create(full_name="Yo Yo")
     book = Book.objects.create(title="Artwork Title", artist=author_)
     # book.save()
     self.assertIn("Title", book.title)
 
   def test_can_save_same_author_to_different_books(self):
-    author_ = Author.objects.get_or_create(full_name="Homer")
+    author_, created = Author.objects.get_or_create(full_name="Homer")
     book1 = Book.objects.create(title="Book 1 Title", artist=author_)
     # book1.save()
     book2 = Book.objects.create(title="Book 2 Title", artist=author_)
@@ -185,12 +181,12 @@ class BookModelTest(TestCase):
 class MovieModelTest(TestCase):
 
   def test_can_save_movie_with_new_artist(self):
-    artist_ = Artist.objects.create(first_name='Homer')
-    mov_ = Movie.objects.create(artist=artist_)
+    dir_ = Director.objects.create(first_name='Homer')
+    mov_ = Movie.objects.create(artist=dir_)
     self.assertIs(isinstance(mov_, Movie), True)
 
   def test_can_add_director_editor_properties(self):
-    artist_ = Artist(first_name="Frank Capra")
+    artist_ = Director(first_name="Frank Capra")
     artist_.save()
     self.assertEqual(Artist.objects.count(), 1)
 
@@ -198,3 +194,5 @@ class MovieModelTest(TestCase):
     movie.artist = artist_
     movie.save()
     self.assertEqual(Movie.objects.count(), 1)
+
+    movie.director
