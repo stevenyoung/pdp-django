@@ -1,4 +1,5 @@
 from django.test import TestCase
+from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
 
 from django.contrib.gis.geos import Point
@@ -19,8 +20,17 @@ class ArtistModelTest(TestCase):
 
   def test_a_new_artist_requires_a_name(self):
     _a = Artist()
+    with self.assertRaises(ValidationError):
+      _a.save()
+
+  def test_save_new_artist_given_artist_name(self):
+    _a = Artist(first_name='Homer')
     _a.save()
-    self.assertEqual(Artist.objects.count(), 0)
+    self.assertEqual(Artist.objects.count(), 1)
+
+  def test_full_name_from_first_and_last(self):
+    a_ = Artist.objects.create(first_name="First", last_name="Last")
+    self.assertEqual("First Last", a_.full_name)
 
   def test_cannot_save_existing_artist(self):
     _a = Artist(first_name='Homer')
@@ -29,9 +39,17 @@ class ArtistModelTest(TestCase):
     with self.assertRaises(IntegrityError):
       _b.save()
 
-  def test_full_name_from_first_and_last(self):
-    a_ = Artist.objects.create(first_name="First", last_name="Last")
-    self.assertEqual("First Last", a_.full_name)
+  def test_artist_data_is_available_from_movies_saves_(self):
+    artist_ = Artist(first_name="Frank Capra")
+    artist_.save()
+    self.assertEqual(Artist.objects.count(), 1)
+
+    movie = Movie(title="Movie Title")
+    movie.artist = artist_
+    movie.save()
+    self.assertEqual(Movie.objects.count(), 1)
+    self.assertIs(isinstance(movie.artist, Artist), True)
+    self.assertEqual(movie.artist.full_name, "Frank Capra")
 
 
 class ArtworkModelTest(TestCase):
@@ -53,6 +71,10 @@ class SceneModelTest(TestCase):
     self.artist_ = Author.objects.create(first_name='First', last_name='Last')
     self.artwork_ = Artwork.objects.create(title='Artwork Title',
                                            artist=self.artist_)
+
+  def tearDown(self):
+    self.artist_.delete()
+    self.artwork_.delete()
 
   def test_saving_and_retrieving_scene_descriptions(self):
     scene = Scene(artwork=self.artwork_)
@@ -129,7 +151,7 @@ class BookModelTest(TestCase):
     self.assertIn("Title", book.title)
 
   def test_can_save_same_author_to_different_books(self):
-    author_ = Author.objects.create()
+    author_ = Author.objects.get_or_create(full_name="Homer")
     book1 = Book.objects.create(title="Book 1 Title", artist=author_)
     # book1.save()
     book2 = Book.objects.create(title="Book 2 Title", artist=author_)
@@ -137,20 +159,29 @@ class BookModelTest(TestCase):
     self.assertEqual(book1.artist, book2.artist)
 
   def test_book_can_have_multiple_authors(self):
-    _auth1 = Author.objects.create()
-    _auth2 = Author.objects.create()
+    _auth1 = Author.objects.create(first_name='Homer')
+    _auth2 = Author.objects.create(full_name='Virgil')
     book_ = Book.objects.create(artist=_auth1)
-    book_.author = [_auth1, _auth2]
+    combined_author = ', '.join([_auth1.full_name, _auth2.full_name])
+    book_.artist = Author.objects.create(full_name=combined_author)
     book_.save()
+    newest = Book.objects.first()
+    self.assertEqual(newest.artist.full_name, 'Homer, Virgil')
 
 
 class MovieModelTest(TestCase):
 
-  def test_saving_and_retrieving_movies(self):
-    dir1_ = Director.objects.create()
-    dir2_ = Director.objects.create()
-    editor_ = Editor.objects.create()
-    movie = Movie.objects.create(title="Movie Title", artist=dir1_)
-    movie.director = [dir1_, dir2_]
-    movie.editor = [editor_]
+  def test_can_save_movie_with_new_artist(self):
+    artist_ = Artist.objects.create(first_name='Homer')
+    mov_ = Movie.objects.create(artist=artist_)
+    self.assertIs(isinstance(mov_, Movie), True)
+
+  def test_can_add_director_editor_properties(self):
+    artist_ = Artist(first_name="Frank Capra")
+    artist_.save()
+    self.assertEqual(Artist.objects.count(), 1)
+
+    movie = Movie(title="Movie Title")
+    movie.artist = artist_
     movie.save()
+    self.assertEqual(Movie.objects.count(), 1)
