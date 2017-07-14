@@ -78,26 +78,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#     }
-# }
-
 DATABASES = {
-    'mysql': {
-        'ENGINE': 'django.contrib.gis.db.backends.mysql',
-        'NAME': 'pdpdj',
-        'USER': 'pdpdj',
-        'PASSWORD': 'pdpdj',
-        'HOST': '127.0.0.1',
-        'PORT': '3306'
-    },
-    'spatialite': {
-      'ENGINE': 'django.contrib.gis.db.backends.spatialite',
-      'NAME': os.path.join(BASE_DIR, 'spatialite.sqlite3')
-    },
     'default': {
       'ENGINE': 'django.contrib.gis.db.backends.postgis',
       'NAME': 'pdppostgis',
