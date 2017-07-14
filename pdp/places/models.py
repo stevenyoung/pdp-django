@@ -64,9 +64,15 @@ class Book(Artwork):
 
 class SceneDistanceManager(models.Manager):
 
-  def distance_filter(self, lat, lng):
+  QUERYSET_ROW_LIMIT = 100
+
+  def distance_filter(self, lat, lng, offset=None):
     pnt = GEOSGeometry(Point(float(lng), float(lat)))
-    qs = Scene.objects.filter(coordinates__dwithin=(pnt, D(mi=100)))
+    if offset:
+      end = offset + self.QUERYSET_ROW_LIMIT
+    else:
+      end = self.QUERYSET_ROW_LIMIT
+    qs = Scene.objects.filter(coordinates__dwithin=(pnt, D(mi=100)))[offset:end]
     return qs
 
 
